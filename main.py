@@ -8,7 +8,7 @@ arq.close()
 matriz = []
 # funcs.matrificar(string, matriz)
 # print(matriz)
-funcs.sis_p_str(string)
+funcs.matrificar(string, matriz)
 # print(funcs.linha_e_legal([1, '=', 2]))
 # print(funcs.linha_e_legal([1, 'x', 2]))
 # print(funcs.linha_e_legal([1, 'x']))

@@ -11,24 +11,35 @@ def sis_p_str(valor):
         try:
             elementos = linha.split()
             # Verifica se linha é legal
+            lista_el_linha = []
             if linha_e_legal(elementos):
                 # Se for legal, próximo passo!
                 # Contagem de variáveis! Guarda apenas o maior número de variáveis!
                 # Conta apenas letras únicas
                 for el in elementos:
+                    # Verifica se tem múltiplos números
+                    if el.isnumeric() and any(llle.isnumeric() for llle in lista_el_linha):
+                        raise Exception(
+                            f"Múltiplas ocorrências de números na mesma linha: {l_i} | {linha}")
+                    elif el.isnumeric():
+                        lista_el_linha.append(el)
                     for ema in el:
-                        if ema.isalpha() and ema not in lista_letras:
-                            lista_letras.append(ema)
+                        if ema.isalpha():
+                            if ema not in lista_letras:
+                                lista_letras.append(ema)
+                            if ema not in lista_el_linha:
+                                lista_el_linha.append(ema)
+                            else:
+                                raise Exception(
+                                    f"Múltiplas ocorrências de uma mesma variável na mesma linha: {l_i} | {linha}")
             else:
                 raise Exception(f'linha {l_i} | \'{linha}\' é ilegal!')
         except Exception as e:
             print(e)
-            return False
+            quit()
     print('Letras: ', lista_letras)
-    max_linhas = len(lista_letras)
-    # PASSO 2
-    # Gera matriz usando como referência as letras
-
+    # max_linhas = len(lista_letras)
+    return lista_letras
 
 
 def linha_e_legal(linha_el):
@@ -43,16 +54,35 @@ def linha_e_legal(linha_el):
 
 
 # Transforma string de valores em matriz no Python
+# Função mestra
 def matrificar(valor, matriz):
-    lines = valor.split('\n')
-    # Por linha separa elementos
-    for line in lines:
-        line_list = line.split()
-        val_list = []
-        # Numerifica
-        for val in line_list:
-            if val.isdigit():
-                val_list.append(int(val))
-            else:
-                raise ValueError ("Value is not numerical!")
-        matriz.append(val_list)
+    # PASSO 1
+    # Gera lista de letras únicas (variáveis)
+    lista_var = sis_p_str(valor)
+    # PASSO 2
+    # Gera matriz usando como referência as letras
+    col_cont = len(lista_var)
+    linha_cont = valor.count('\n') + 1
+    # O '+ 1' é para considerar os elementos independentes nas colunas!
+    matriz = [[0 for coluna in range(col_cont + 1)] for linha in range(linha_cont)]
+    # Agora adiciona valores das colunas de acordo com a ordem das variáveis
+    # Para cada linha!
+    # Usa a lista de valores para identificar variáveis para serem adicionadas
+    for v_col, var_type in enumerate(lista_var):
+        for v_lin, linha_str in enumerate(valor.split('\n')):
+            for el in linha_str.split():
+                val_p_soma = 1.0
+                if var_type in el:
+                    # 2 Casos (se houver número ou não!)
+                    if any(char.isdigit() for char in el):
+                        # Substring sem letras
+                        clean_val = el
+                        for char in el:
+                            if char.isalpha():
+                                clean_val = clean_val.replace(char, '')
+                        # Transforma em número e soma
+                        val_p_soma = float(clean_val)
+
+                    matriz[v_lin][v_col] += val_p_soma  # Tenho que decidir a operação certa, muito trabalho!!!
+    for linha in matriz:
+        print(linha)

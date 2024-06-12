@@ -5,7 +5,7 @@ def sis_p_str(valor):
     # Lista os elementos
     # Separa por linha
     linhas_valor = valor.split('\n')
-    lista_letras = []
+    lista_vars = []
     # Separa os elementos da linha para cada linha
     for l_i, linha in enumerate(linhas_valor):
         try:
@@ -25,8 +25,8 @@ def sis_p_str(valor):
                         lista_el_linha.append(el)
                     for ema in el:
                         if ema.isalpha():
-                            if ema not in lista_letras:
-                                lista_letras.append(ema)
+                            if ema not in lista_vars:
+                                lista_vars.append(ema)
                             if ema not in lista_el_linha:
                                 lista_el_linha.append(ema)
                             else:
@@ -37,9 +37,9 @@ def sis_p_str(valor):
         except Exception as e:
             print(e)
             quit()
-    print('Letras: ', lista_letras)
-    # max_linhas = len(lista_letras)
-    return lista_letras
+    print('Letras: ', lista_vars)
+    # max_linhas = len(lista_vars)
+    return lista_vars
 
 
 def linha_e_legal(linha_el):
@@ -55,7 +55,7 @@ def linha_e_legal(linha_el):
 
 # Transforma string de valores em matriz no Python
 # Função mestra
-def matrificar(valor, matriz):
+def matrificar(valor):
     # PASSO 1
     # Gera lista de letras únicas (variáveis)
     lista_var = sis_p_str(valor)
@@ -101,8 +101,38 @@ def matrificar(valor, matriz):
             if negativo:
                 indie_p_soma *= -1
 
-        matriz[v_lin][col_cont - 1] = indie_p_soma # Coloca os termos independentes
+        matriz[v_lin][col_cont - 1] = indie_p_soma  # Coloca os termos independentes
+
+    return lista_var, matriz
 
 
-    for linha in matriz:
-        print(linha)
+def calcular(matriz):
+    num_vars = len(matriz)
+    for id_pivo in range(num_vars):  # id_pivo: Coordenadas transversais do pivô
+        # Verifica se pivo == 0 'Para translocar linhas'
+        pivo = matriz[id_pivo][id_pivo]
+        if pivo == 0:
+            continue  # Temporário
+
+        # Divide linha pelo valor do pivo
+        for id_val, _ in enumerate(matriz[id_pivo]):
+            matriz[id_pivo][id_val] /= pivo
+
+        # Elimina todos abaixo e acima do pivo (linha p/ linha)
+        for id_linha, linha in enumerate(matriz):
+            # Pula se for a linha atual
+            if id_linha == id_pivo:
+                continue
+
+            # Soma correspondentes
+            pseudo_linha = [el_+matriz[id_pivo][i_el]*(-linha[id_pivo])
+                            for i_el, el_ in enumerate(linha)]
+            matriz[id_linha] = pseudo_linha.copy()
+        print(f"-- Passo {id_pivo} -- \nMatriz: {matriz}")
+    return matriz
+
+
+def resultar(matriz, vars):
+    num_linhas = len(matriz)
+    for id_l_ in range(num_linhas):
+        print(f"{vars[id_l_]} = {matriz[id_l_][-1]:.3f}")

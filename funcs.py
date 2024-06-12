@@ -61,16 +61,18 @@ def matrificar(valor, matriz):
     lista_var = sis_p_str(valor)
     # PASSO 2
     # Gera matriz usando como referência as letras
-    col_cont = len(lista_var)
+    col_cont = len(lista_var) + 1
     linha_cont = valor.count('\n') + 1
     # O '+ 1' é para considerar os elementos independentes nas colunas!
-    matriz = [[0 for coluna in range(col_cont + 1)] for linha in range(linha_cont)]
+    matriz = [[0 for coluna in range(col_cont)] for linha in range(linha_cont)]
     # Agora adiciona valores das colunas de acordo com a ordem das variáveis
     # Para cada linha!
     # Usa a lista de valores para identificar variáveis para serem adicionadas
-    for v_col, var_type in enumerate(lista_var):
-        for v_lin, linha_str in enumerate(valor.split('\n')):
-            for el in linha_str.split():
+    for v_lin, linha_str in enumerate(valor.split('\n')):
+        # Valor das variáveis numéricas na linha
+        indie_p_soma = 0
+        for el in linha_str.split():
+            for v_col, var_type in enumerate(lista_var):
                 val_p_soma = 1.0
                 if var_type in el:
                     # 2 Casos (se houver número ou não!)
@@ -84,5 +86,23 @@ def matrificar(valor, matriz):
                         val_p_soma = float(clean_val)
 
                     matriz[v_lin][v_col] += val_p_soma  # Tenho que decidir a operação certa, muito trabalho!!!
+
+            # Adição de números
+            # Procura elementos numéricos
+            # Verifica se tem '-' no número
+            el_aux = el
+            negativo = False
+            if '-' in el_aux:
+                # Retira parte negativa
+                el_aux = el_aux.replace('-', '')
+                negativo = True
+            if el_aux.isnumeric():
+                indie_p_soma += float(el_aux)
+            if negativo:
+                indie_p_soma *= -1
+
+        matriz[v_lin][col_cont - 1] = indie_p_soma # Coloca os termos independentes
+
+
     for linha in matriz:
         print(linha)

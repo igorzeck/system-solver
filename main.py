@@ -16,7 +16,7 @@ for linha in matriz:
     print(linha)
 
 # Resultado:
-funcs.resultar(matriz, variaveis)
+print("Classificação: ", funcs.resultar(matriz, variaveis))
 # print(funcs.linha_e_legal([1, '=', 2]))
 # print(funcs.linha_e_legal([1, 'x', 2]))
 # print(funcs.linha_e_legal([1, 'x']))

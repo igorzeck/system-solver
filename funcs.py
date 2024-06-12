@@ -71,6 +71,7 @@ def matrificar(valor):
     for v_lin, linha_str in enumerate(valor.split('\n')):
         # Valor das variáveis numéricas na linha
         indie_p_soma = 0
+        el_anterior = 0
         for el in linha_str.split():
             for v_col, var_type in enumerate(lista_var):
                 val_p_soma = 1.0
@@ -84,23 +85,28 @@ def matrificar(valor):
                                 clean_val = clean_val.replace(char, '')
                         # Transforma em número e soma
                         val_p_soma = float(clean_val)
+                    # Verifica se é negativo por char anterior
+                    if el_anterior == '-':
+                        val_p_soma *= -1
 
                     matriz[v_lin][v_col] += val_p_soma  # Tenho que decidir a operação certa, muito trabalho!!!
 
             # Adição de números
             # Procura elementos numéricos
-            # Verifica se tem '-' no número
+            # Verifica se tem '-' no número ou se tem '-' antes do elemento
             el_aux = el
             negativo = False
-            if '-' in el_aux:
+            if ('-' in el_aux) or (el_anterior == '-'):
                 # Retira parte negativa
                 el_aux = el_aux.replace('-', '')
-                negativo = True
+                if len(el_aux) > 0:
+                    negativo = True
             if el_aux.isnumeric():
                 indie_p_soma += float(el_aux)
             if negativo:
                 indie_p_soma *= -1
-
+            # Muda o anterior
+            el_anterior = el
         matriz[v_lin][col_cont - 1] = indie_p_soma  # Coloca os termos independentes
 
     return lista_var, matriz
@@ -134,5 +140,26 @@ def calcular(matriz):
 
 def resultar(matriz, vars):
     num_linhas = len(matriz)
+    classificação = "Sistema possível e indeterminado."
+    # Verifica tipo do sistema!
+    # Impossível
+    for linha in matriz:
+        if all(l_ == 0 for l_ in linha[:-1]):
+            classificação = "Sistema impossível."
+            print("S = Nulo")
+            return classificação
+    # Possível e determinado (pela diagonal)
+    diagonal_ = diagonalizar(matriz)
+    if all(d_ == 1 for d_ in diagonal_):
+        classificação = "Sistema possível e determinado"
     for id_l_ in range(num_linhas):
         print(f"{vars[id_l_]} = {matriz[id_l_][-1]:.3f}")
+
+    return classificação
+
+
+def diagonalizar(matriz):
+    diagonal = []
+    for i in range(len(matriz)):
+        diagonal.append(matriz[i][i])
+    return diagonal

@@ -1,3 +1,8 @@
+IMPOSS = 0
+POSS_INDET = 1
+POSS_DET = 2
+
+
 # Transforma string do sistema para string que reflita a matriz
 def sis_p_str(valor):
     # PASSO 1
@@ -138,24 +143,34 @@ def calcular(matriz):
     return matriz
 
 
-def resultar(matriz, vars):
-    num_linhas = len(matriz)
-    classificação = "Sistema possível e indeterminado."
+def resultar(matriz, variaveis):
+    classific_id = POSS_DET
+    classificacao = "Sistema não calculável."
+    matriz_copy = []
+    # Retira linhas zeradas (com termo independente == 0)!
+    for id_termos_, termos_ in enumerate(matriz):
+        if all(termos_el == 0 for termos_el in termos_):
+            continue
+        matriz_copy.append(termos_)
+    matriz = matriz_copy
+    print_matriz(matriz, "Pós tratamento: ")
+    #
     # Verifica tipo do sistema!
-    # Impossível
+    #
+    conj_solucao = []
+    sol_p_extenso = ""
     for linha in matriz:
+        # Impossível
         if all(l_ == 0 for l_ in linha[:-1]):
-            classificação = "Sistema impossível."
-            print("S = Nulo")
-            return classificação
-    # Possível e determinado (pela diagonal)
-    diagonal_ = diagonalizar(matriz)
-    if all(d_ == 1 for d_ in diagonal_):
-        classificação = "Sistema possível e determinado"
-    for id_l_ in range(num_linhas):
-        print(f"{vars[id_l_]} = {matriz[id_l_][-1]:.3f}")
-
-    return classificação
+            classific_id = IMPOSS
+            break
+        # Verifica se é indeterminado
+        # Não dá break porque ainda pode ser impossível
+        if linha.count(1.0) > 1:
+            classific_id = POSS_INDET
+    # Se não é impossível ou indeterminado só sobra determinado
+    classificacao = descrever_s(matriz, conj_solucao, classific_id, variaveis)
+    return classificacao
 
 
 def diagonalizar(matriz):
@@ -163,3 +178,50 @@ def diagonalizar(matriz):
     for i in range(len(matriz)):
         diagonal.append(matriz[i][i])
     return diagonal
+
+
+def descrever_s(matriz, conj_s, tipo, variaveis):
+    classificacao = "Sistema é possível"
+    sol_p_extenso = " "
+    num_linhas = len(matriz)
+    match tipo:
+        case 2:
+            # Colocar numa função!
+            # Possível e determinado (pela diagonal)
+            diagonal_ = diagonalizar(matriz)
+            if all(d_ == 1 for d_ in diagonal_):
+                for id_l_ in range(num_linhas):
+                    result = matriz[id_l_][-1]
+                    conj_s.append(result)
+                    # Criar função pra descrever o conjunto solução literalmente!
+                    sol_p_extenso += str(f"{result:.3f}") + (", " if id_l_ != num_linhas - 1 else "")
+            print("S = {" + sol_p_extenso + "}")
+            classificacao += " e determinado."
+        case 1:
+            # Todos as 'primeiras' variáveis
+            variaveis_ambulantes = variaveis[num_linhas :].copy()  # Aquelas que definem as outras
+            print(variaveis_ambulantes)
+            # Criar classe com sistemas?
+            print("S = {" + sol_p_extenso + "}")
+            classificacao += " e indeterminado."
+        case 0:
+            print("S = {" + sol_p_extenso + "}")
+            classificacao = "Sistema impossível."
+        case _:
+            raise Exception ("Erro ao tentar descrever o conjunto S!")
+
+    return classificacao
+
+
+def print_matriz(matriz, titulo=""):
+    print(titulo)
+    for linha in matriz:
+        print(linha)
+
+
+# Inutil?
+def pegar_col(matriz, i_col):
+    coluna = []
+    for linha in matriz:
+        coluna.append(linha[i_col])
+    return coluna

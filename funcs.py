@@ -77,7 +77,12 @@ def matrificar(valor):
         # Valor das variáveis numéricas na linha
         indie_p_soma = 0
         el_anterior = 0
+        negativar_ = False
+        negativar_inden_ = True
         for el in linha_str.split():
+            if el == '=':
+                negativar_ = True
+                negativar_inden_ = False
             for v_col, var_type in enumerate(lista_var):
                 val_p_soma = 1.0
                 if var_type in el:
@@ -90,8 +95,14 @@ def matrificar(valor):
                                 clean_val = clean_val.replace(char, '')
                         # Transforma em número e soma
                         val_p_soma = float(clean_val)
+                    else:
+                        if '-' in el:
+                            val_p_soma *= -1
                     # Verifica se é negativo por char anterior
                     if el_anterior == '-':
+                        val_p_soma *= -1
+                    # Se é negativo por posição
+                    if negativar_:
                         val_p_soma *= -1
 
                     matriz[v_lin][v_col] += val_p_soma  # Tenho que decidir a operação certa, muito trabalho!!!
@@ -101,15 +112,19 @@ def matrificar(valor):
             # Verifica se tem '-' no número ou se tem '-' antes do elemento
             el_aux = el
             negativo = False
-            if ('-' in el_aux) or (el_anterior == '-'):
+            if '-' in el_aux:
                 # Retira parte negativa
                 el_aux = el_aux.replace('-', '')
-                if len(el_aux) > 0:
+                if len(el_aux) != 0:
                     negativo = True
             if el_aux.isnumeric():
                 indie_p_soma += float(el_aux)
-            if negativo:
-                indie_p_soma *= -1
+                if negativar_inden_:
+                    indie_p_soma *= -1
+                if negativo:
+                    indie_p_soma *= -1
+                if el_anterior == '-':
+                    indie_p_soma *= -1
             # Muda o anterior
             el_anterior = el
         matriz[v_lin][col_cont - 1] = indie_p_soma  # Coloca os termos independentes

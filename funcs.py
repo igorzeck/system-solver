@@ -60,6 +60,7 @@ def linha_e_legal(linha_el):
 
 # Transforma string de valores em matriz no Python
 # Função mestra
+# Cada caractere é visto como sendo uma variável diferente! Tem que arrumar
 def matrificar(valor):
     # PASSO 1
     # Gera lista de letras únicas (variáveis)
@@ -175,14 +176,15 @@ def resultar(matriz, variaveis):
     conj_solucao = []
     sol_p_extenso = ""
     for linha in matriz:
+        # Verifica se é indeterminado
+        # Não dá break porque ainda pode ser impossível
+        # Tenho que contar tudo que for diferente de zero?
+        if len(variaveis) > len(matriz):
+            classific_id = POSS_INDET
         # Impossível
         if all(l_ == 0 for l_ in linha[:-1]):
             classific_id = IMPOSS
             break
-        # Verifica se é indeterminado
-        # Não dá break porque ainda pode ser impossível
-        if linha.count(1.0) > 1:
-            classific_id = POSS_INDET
     # Se não é impossível ou indeterminado só sobra determinado
     classificacao = descrever_s(matriz, conj_solucao, classific_id, variaveis)
     return classificacao
@@ -209,14 +211,43 @@ def descrever_s(matriz, conj_s, tipo, variaveis):
                     result = matriz[id_l_][-1]
                     conj_s.append(result)
                     # Criar função pra descrever o conjunto solução literalmente!
-                    sol_p_extenso += str(f"{result:.3f}") + (", " if id_l_ != num_linhas - 1 else "")
+                    sol_p_extenso += str(f"{result:.3f}") + (", " if id_l_ != num_linhas - 1 else " ")
             print("S = {" + sol_p_extenso + "}")
             classificacao += " e determinado."
         case 1:
-            # Todos as 'primeiras' variáveis
-            variaveis_ambulantes = variaveis[num_linhas :].copy()  # Aquelas que definem as outras
-            print(variaveis_ambulantes)
             # Criar classe com sistemas?
+            # Passo I - Encontrar primeiros elementos em cada lista
+            lista_todos_el = []  # Coordenadas (l, c)
+            for id_l_, linha_ in enumerate(matriz):
+                linha_aux_ = []
+                for id_c_, el_ in enumerate(linha_[:-1]):
+                    if el_ != 0:
+                        linha_aux_.append(id_c_)
+                lista_todos_el.append(linha_aux_.copy())
+            print(lista_todos_el)
+            lista_valor = []  # Valor do elemento zero
+            # Passo II - Tudo após elemento zero da linha é negativado (menos independentes) e somado
+            for id_l_, lista_el_ in enumerate(lista_todos_el):
+                linha_valores = [matriz[id_l_][x] for x in lista_el_]
+                # Mais indenpendentes
+                lista_valor.append([-x for x in linha_valores[1:]] + [matriz[id_l_][-1]])
+            # Passo III - Encontra os n menores elementos da lista - n é igual ao número de linhas não nulas
+            # É possível que eu perca ma variável?
+            # Muito mais complicado do que deveria ser!!!
+            lista_resultados = []
+            for l_valor_, lista_el_ in enumerate(lista_todos_el):
+                to_append_ = str(variaveis[lista_el_[0]]) + " = "
+                if len(lista_el_) > 1:
+                    for i_el, el_ in enumerate(lista_el_[1:]):
+                        to_append_ += str(lista_valor[l_valor_][i_el]) + variaveis[el_] + (" + " if i_el < len(lista_el_) - 2 != 0 else "")
+                    # Coloca '+' no final
+                    if matriz[l_valor_][-1] != 0:
+                        to_append_ += " + "
+                if matriz[l_valor_][-1] != 0:
+                    to_append_ += str(matriz[l_valor_][-1])
+                lista_resultados.append(to_append_)
+                print(lista_resultados)
+                lista_resultados.clear()
             print("S = {" + sol_p_extenso + "}")
             classificacao += " e indeterminado."
         case 0:

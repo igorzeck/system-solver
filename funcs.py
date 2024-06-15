@@ -134,8 +134,8 @@ def matrificar(valor):
 
 
 def calcular(matriz):
-    num_vars = len(matriz)
-    for id_pivo in range(num_vars):  # id_pivo: Coordenadas transversais do pivô
+    pivo_max = min(len(matriz), len(matriz[0]))
+    for id_pivo in range(pivo_max):  # id_pivo: Coordenadas transversais do pivô
         # Verifica se pivo == 0 'Para translocar linhas'
         pivo = matriz[id_pivo][id_pivo]
         if pivo == 0:
@@ -199,7 +199,7 @@ def diagonalizar(matriz):
 
 def descrever_s(matriz, conj_s, tipo, variaveis):
     classificacao = "Sistema é possível"
-    sol_p_extenso = " "
+    sol_p_extenso = ""
     num_linhas = len(matriz)
     match tipo:
         case 2:
@@ -231,24 +231,54 @@ def descrever_s(matriz, conj_s, tipo, variaveis):
                 linha_valores = [matriz[id_l_][x] for x in lista_el_]
                 # Mais indenpendentes
                 lista_valor.append([-x for x in linha_valores[1:]] + [matriz[id_l_][-1]])
-            # Passo III - Encontra os n menores elementos da lista - n é igual ao número de linhas não nulas
-            # É possível que eu perca ma variável?
-            # Muito mais complicado do que deveria ser!!!
-            lista_resultados = []
-            for l_valor_, lista_el_ in enumerate(lista_todos_el):
-                to_append_ = str(variaveis[lista_el_[0]]) + " = "
+            # Passo III - Encontrar par variável e valor que a substitui
+            # Lê de trás para frente para primeiro pegar as variáveis mais simplificados
+            l_valor_ = len(lista_todos_el) - 1
+            pair_substitute = []
+            while l_valor_ >= 0:
+                lista_el_ = lista_todos_el[l_valor_]
+                to_append_pair_ = ""
                 if len(lista_el_) > 1:
                     for i_el, el_ in enumerate(lista_el_[1:]):
-                        to_append_ += str(lista_valor[l_valor_][i_el]) + variaveis[el_] + (" + " if i_el < len(lista_el_) - 2 != 0 else "")
+                        to_append_pair_ += f"{lista_valor[l_valor_][i_el]:.3f}" + variaveis[el_] + (" + " if i_el < len(lista_el_) - 2 != 0 else "")
                     # Coloca '+' no final
                     if matriz[l_valor_][-1] != 0:
-                        to_append_ += " + "
+                        to_append_pair_ += " + "
                 if matriz[l_valor_][-1] != 0:
-                    to_append_ += str(matriz[l_valor_][-1])
-                lista_resultados.append(to_append_)
-                print(lista_resultados)
-                lista_resultados.clear()
-            print("S = {" + sol_p_extenso + "}")
+                    to_append_pair_ += f"{matriz[l_valor_][-1]:.3f}"
+                pair_substitute.append((variaveis[lista_el_[0]], to_append_pair_))
+                print(pair_substitute)
+                l_valor_ -= 1
+            # Passo IV - Resultado por coluna (variável) e montagem do sol_p_extenso
+            sol_p_extenso += "("
+            # Adicionar variáveis
+            variaveis_extenso_ = ""
+            for id_var_, variavel_ in enumerate(variaveis):
+                sol_p_extenso += variavel_ + (", " if id_var_ < len(variaveis) - 1 else ")")
+            variaveis_in_pair_ = []
+            for variavel_ in variaveis:
+                for pair_ in pair_substitute:
+                    if pair_[0] == variavel_:
+                        variaveis_in_pair_.append(variavel_)
+                        sol_p_extenso = sol_p_extenso.replace(variavel_, pair_[1])
+            variaveis_not_in_pair = []
+            for variavel_ in variaveis:
+                if variavel_ not in variaveis_in_pair_:
+                    variaveis_not_in_pair.append(variavel_)
+                    variaveis_extenso_ += variavel_ + ", "
+            variaveis_extenso_ += "$"  # Há formas melhores de fazer isso aqui, e mais precisas!
+            num_dimension_ = str(len(variaveis))
+            num_power_table = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
+            variaveis_extenso_ = variaveis_extenso_.replace(", $", "")
+            for i_ in range(0, 10):
+                i_to_str_ = str(i_)
+                if i_to_str_ in num_dimension_:
+                    num_dimension_ = num_dimension_.replace(i_to_str_, num_power_table[i_])
+            greek_alphabet_correlation_ = ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ/ς", "τ", "υ", "φ", "χ", "ψ", "ω"]
+            sol_p_extenso += " ∈ R" + num_dimension_ + "; " + variaveis_extenso_
+            for var_id_, var_ in enumerate(variaveis_not_in_pair):
+                sol_p_extenso = sol_p_extenso.replace(var_, greek_alphabet_correlation_[var_id_])
+            print("S = {" + sol_p_extenso + " ∈ R}")
             classificacao += " e indeterminado."
         case 0:
             print("S = {" + sol_p_extenso + "}")

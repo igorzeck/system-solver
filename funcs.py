@@ -2,6 +2,11 @@ IMPOSS = 0
 POSS_INDET = 1
 POSS_DET = 2
 
+#
+#   'BUGS'
+#
+# Resolver problema de não haver substituição dos valores independetes somados (Tecnincamente não é um bug!)
+# Bug em relação a variáveis não poderem ter mais de uma letra!
 
 # Transforma string do sistema para string que reflita a matriz
 def sis_p_str(valor):
@@ -201,6 +206,7 @@ def descrever_s(matriz, conj_s, tipo, variaveis):
     classificacao = "Sistema é possível"
     sol_p_extenso = ""
     num_linhas = len(matriz)
+    # Definido e determinado e definido e indeterminado não precisam mais serem separados!
     match tipo:
         case 2:
             # Colocar numa função!
@@ -211,7 +217,7 @@ def descrever_s(matriz, conj_s, tipo, variaveis):
                     result = matriz[id_l_][-1]
                     conj_s.append(result)
                     # Criar função pra descrever o conjunto solução literalmente!
-                    sol_p_extenso += str(f"{result:.3f}") + (", " if id_l_ != num_linhas - 1 else " ")
+                    sol_p_extenso += str(f"{result:.3f}") + (", " if id_l_ != num_linhas - 1 else "")
             print("S = {" + sol_p_extenso + "}")
             classificacao += " e determinado."
         case 1:

@@ -7,9 +7,10 @@ x - y - z = 2
 x + 2y = -2z + 2
 x - y - z = 2
 
-x + y + z + w = 0
-x - y - z + w = 1
-3x + y + z + 3w = 1
+# Abaixo contém anomalia com substituição final de valores!
+w + 2x + 3y + 4z = 0
+w + 3x + 5y + 6z = 2
+x + 2y + 3z = 1
 
 x + y = 5
 2x + 2y = 10
